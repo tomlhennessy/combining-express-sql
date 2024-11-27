@@ -9,7 +9,8 @@ const DATA_SOURCE = 'app.db';
 /**
  * Step 1 - Connect to the database
  */
-// Your code here
+const sqlite3 = require('sqlite3');
+const db = new sqlite3.Database(DATA_SOURCE, sqlite3.OPEN_READWRITE);
 
 // Express using json - DO NOT MODIFY
 app.use(express.json());
@@ -29,18 +30,24 @@ app.get('/colors/:id', (req, res, next) => {
     /**
      * STEP 2A - SQL Statement
      */
-    // Your code here
+    const sql = `SELECT * FROM colors WHERE id = ?`;
 
     /**
      * STEP 2B - SQL Parameters
      */
-    // Your code here
+    const params = [req.params.id];
 
     /**
      * STEP 2C - Call database function
      *  - return response
      */
-    // Your code here
+    db.get(sql, params, (err, row) => {
+        if (err) {
+            next(err);
+        } else {
+            res.json(row);
+        }
+    })
 });
 
 // Add color
@@ -59,7 +66,19 @@ app.get('/colors/add/:name', (req, res, next) => {
      *  - if no error, query for new row
      *  - return new row
      */
-    // Your code here
+    db.run(sql, params, (err) => {
+        if (err) {
+            next(err);
+        } else {
+            db.get(sqlLast, [], (err, row) => {
+                if (err) {
+                    next(err);
+                } else {
+                    res.json(row);
+                }
+            })
+        }
+    })
 })
 
 // Root route - DO NOT MODIFY
@@ -70,5 +89,5 @@ app.get('/', (req, res) => {
 });
 
 // Set port and listen for incoming requests - DO NOT MODIFY
-const port = 5000;
+const port = 5001;
 app.listen(port, () => console.log('Server is listening on port', port));
